@@ -5,12 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TodoApp"
         xmlns:models="clr-namespace:TodoApp.Models"
+        xmlns:converters="clr-namespace:TodoApp.Converters"
         mc:Ignorable="d"
         Title="ToDo App" Height="550" Width="800"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:DeadlineToColorConverter x:Key="DeadlineToColorConverter" />
 
         <Style x:Key="TaskItemStyle" TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -60,7 +62,7 @@
         <Grid Grid.Row="1" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="200"/>
             </Grid.ColumnDefinitions>
 
             <!-- Task List -->
@@ -70,73 +72,211 @@
                     CornerRadius="5"
                     Padding="5"
                     Grid.Column="0">
-                <ListView x:Name="TasksListView" 
-                          ItemContainerStyle="{StaticResource TaskItemStyle}"
-                          SelectionChanged="TasksListView_SelectionChanged">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Status" Width="50">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsCompleted, Mode=TwoWay}" 
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Sort Controls -->
+                    <Border Grid.Row="0" 
+                            Background="#f8f9fa" 
+                            Padding="10,8" 
+                            Margin="5,5,5,10"
+                            CornerRadius="4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Sort by:" 
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,10,0"
+                                       FontWeight="Medium"
+                                       Grid.Column="0"/>
+
+                            <ComboBox x:Name="SortComboBox" 
+                                      Width="200" 
+                                      SelectionChanged="SortComboBox_SelectionChanged"
+                                      Grid.Column="1"
+                                      HorizontalAlignment="Left">
+                                <ComboBoxItem Content="Due Date (Earliest First)" IsSelected="True"/>
+                                <ComboBoxItem Content="Due Date (Latest First)"/>
+                                <ComboBoxItem Content="Priority (High to Low)"/>
+                                <ComboBoxItem Content="Priority (Low to High)"/>
+                                <ComboBoxItem Content="Title (A-Z)"/>
+                                <ComboBoxItem Content="Title (Z-A)"/>
+                            </ComboBox>
+
+                            <Separator Width="2" 
+                                       Margin="20,0,20,0" 
+                                       Grid.Column="2"
+                                       Background="#DDDDDD"/>
+                        </Grid>
+                    </Border>
+
+                    <ListView x:Name="TasksListView" 
+                              Grid.Row="1"
+                              ItemContainerStyle="{StaticResource TaskItemStyle}"
+                              SelectionChanged="TasksListView_SelectionChanged">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Status" Width="50">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsCompleted, Mode=TwoWay}" 
                                                   Checked="CheckBox_StatusChanged" 
                                                   Unchecked="CheckBox_StatusChanged"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Title" Width="250">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Title}" 
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Title" Width="250">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Title}" 
                                                    TextTrimming="CharacterEllipsis">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                                            <Setter Property="TextDecorations" Value="Strikethrough" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Due Date" Width="120">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding DueDate, StringFormat='{}{0:yyyy-MM-dd}'}" />
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Priority" Width="80">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding TaskPriority}" />
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Actions" Width="120">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Button Content="Edit" 
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Due Date" Width="120">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <!-- Deadline indicator -->
+                                                <Ellipse Width="10" Height="10" Margin="0,0,5,0"
+                                                    Fill="{Binding DeadlineStatus, Converter={StaticResource DeadlineToColorConverter}}"
+                                                    Grid.Column="0"
+                                                    VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding DueDate, StringFormat='{}{0:yyyy-MM-dd}'}" 
+                                                      Grid.Column="1"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Priority" Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TaskPriority}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Actions" Width="140">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Edit" 
                                                     Click="EditTask_Click" 
                                                     Tag="{Binding}" 
                                                     Width="50"/>
-                                            <Button Content="Delete" 
+                                                <Button Content="Delete" 
                                                     Click="DeleteTask_Click" 
                                                     Tag="{Binding}" 
                                                     Background="#e74c3c" 
                                                     Width="50"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
             </Border>
+
+            <!-- Side Panel with Histogram Buttons -->
+            <StackPanel Grid.Column="1" 
+                        Margin="10,0,0,0" 
+                        VerticalAlignment="Top">
+                <TextBlock Text="Statistics" 
+                           FontSize="16" 
+                           FontWeight="Bold" 
+                           Margin="0,0,0,10"/>
+
+                <Button Content="Not Completed Tasks" 
+                        Click="NotCompletedHistogram_Click" 
+                        Margin="0,0,0,10" 
+                        Padding="10,5"
+                        Background="#3498db"
+                        Foreground="White">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="4"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                BorderBrush="{TemplateBinding BorderBrush}">
+                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center"
+                                                              Margin="{TemplateBinding Padding}"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#2980b9"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#1f6aa5"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Content="Completed Tasks" 
+                        Click="CompletedHistogram_Click" 
+                        Padding="10,5"
+                        Background="#2ecc71"
+                        Foreground="White">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="4"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                BorderBrush="{TemplateBinding BorderBrush}">
+                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center"
+                                                              Margin="{TemplateBinding Padding}"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#27ae60"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#1e8449"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- Footer: Add New Task Bar -->

@@ -1,0 +1,52 @@
+﻿<Window x:Class="TodoApp.HistogramWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TodoApp"
+        mc:Ignorable="d"
+        Title="Task Histogram" Height="450" Width="600"
+        WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock x:Name="TitleTextBlock" 
+                   Grid.Row="0"
+                   FontSize="18" 
+                   FontWeight="Bold" 
+                   HorizontalAlignment="Center" 
+                   Margin="10"/>
+
+        <!-- Histogram Canvas -->
+        <Border Grid.Row="1" 
+                BorderBrush="LightGray" 
+                BorderThickness="1" 
+                Margin="20,10,20,20"
+                Background="White">
+            <Grid>
+                <Canvas x:Name="HistogramCanvas" 
+                        Margin="40,20,20,40"/>
+
+                <!-- Y-axis label -->
+                <TextBlock Text="Number of Tasks" 
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Left"
+                           Margin="5,0,0,0">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+
+                <!-- X-axis label -->
+                <TextBlock Text="Due Date" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,0,5"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

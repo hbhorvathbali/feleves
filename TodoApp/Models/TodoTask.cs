@@ -12,6 +12,7 @@ namespace TodoApp.Models
         private DateTime _dueDate;
         private bool _isCompleted;
         private Priority _priority;
+        private DateTime _createdDate = DateTime.Now;
 
         public int Id
         {
@@ -61,6 +62,20 @@ namespace TodoApp.Models
                 {
                     _dueDate = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(DeadlineStatus));
+                }
+            }
+        }
+
+        public DateTime CreatedDate
+        {
+            get => _createdDate;
+            set
+            {
+                if (_createdDate != value)
+                {
+                    _createdDate = value;
+                    OnPropertyChanged();
                 }
             }
         }
@@ -74,6 +89,7 @@ namespace TodoApp.Models
                 {
                     _isCompleted = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(DeadlineStatus));
                 }
             }
         }
@@ -91,9 +107,30 @@ namespace TodoApp.Models
             }
         }
 
+        public DeadlineStatus DeadlineStatus
+        {
+            get
+            {
+                if (IsCompleted)
+                    return DeadlineStatus.Normal;
+
+                DateTime today = DateTime.Today;
+                DateTime dueDate = DueDate.Date;
+
+                if (dueDate < today)
+                    return DeadlineStatus.Overdue;
+                else if (dueDate == today)
+                    return DeadlineStatus.DueToday;
+                else if (dueDate == today.AddDays(1))
+                    return DeadlineStatus.DueTomorrow;
+                else
+                    return DeadlineStatus.Normal;
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -104,5 +141,13 @@ namespace TodoApp.Models
         Low,
         Medium,
         High
+    }
+
+    public enum DeadlineStatus
+    {
+        Normal,
+        DueTomorrow,
+        DueToday,
+        Overdue
     }
 }
