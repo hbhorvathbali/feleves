@@ -1,0 +1,126 @@
+﻿<Window x:Class="TodoApp.TaskDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TodoApp"
+        xmlns:models="clr-namespace:TodoApp.Models"
+        mc:Ignorable="d"
+        Title="Task Details" Height="450" Width="600"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <ObjectDataProvider x:Key="PriorityValues" 
+                           MethodName="GetValues" 
+                           ObjectType="{x:Type models:Priority}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="models:Priority"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Text="Task Details" 
+                   FontSize="22" 
+                   Margin="0,0,0,15" 
+                   FontWeight="Medium"
+                   Grid.Row="0"/>
+
+        <!-- Title -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Title" 
+                       FontWeight="Medium" 
+                       Grid.Row="0"/>
+            <TextBox Text="{Binding Task.Title, Mode=TwoWay}" 
+                     FontSize="14" 
+                     Padding="8"
+                     Grid.Row="1"/>
+        </Grid>
+
+        <!-- Description -->
+        <Grid Grid.Row="2" Margin="0,10,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Description" 
+                       FontWeight="Medium" 
+                       Grid.Row="0"/>
+            <TextBox Text="{Binding Task.Description, Mode=TwoWay}" 
+                     AcceptsReturn="True" 
+                     TextWrapping="Wrap" 
+                     VerticalScrollBarVisibility="Auto"
+                     Padding="8"
+                     Grid.Row="1"/>
+        </Grid>
+
+        <!-- Due Date -->
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Due Date" 
+                       FontWeight="Medium" 
+                       Grid.Row="0"/>
+            <DatePicker SelectedDate="{Binding Task.DueDate, Mode=TwoWay}" 
+                        Grid.Row="1"
+                        Padding="5"/>
+        </Grid>
+
+        <!-- Priority -->
+        <Grid Grid.Row="4" Margin="0,10,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Priority" 
+                       FontWeight="Medium" 
+                       Grid.Row="0"/>
+            <ComboBox ItemsSource="{Binding Source={StaticResource PriorityValues}}"
+                      SelectedItem="{Binding Task.TaskPriority, Mode=TwoWay}"
+                      Grid.Row="1"
+                      Padding="5"/>
+        </Grid>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="5" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="0,20,0,0">
+            <CheckBox Content="Mark as Completed" 
+                      IsChecked="{Binding Task.IsCompleted, Mode=TwoWay}" 
+                      VerticalAlignment="Center"
+                      Margin="0,0,20,0"/>
+            <Button Content="Cancel" 
+                    Width="100" 
+                    Height="35" 
+                    Click="CancelButton_Click"
+                    Background="#bdc3c7"/>
+            <Button Content="Save" 
+                    Width="100" 
+                    Height="35" 
+                    Click="SaveButton_Click"
+                    Margin="10,0,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
